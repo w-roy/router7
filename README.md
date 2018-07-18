@@ -6,17 +6,17 @@
 
 router7 is a pure-Go implementation of a small home internet router. It comes with all the services required to make a [fiber7 internet connection](https://www.init7.net/en/internet/fiber7/) work (DHCPv4, DHCPv6, DNS, etc.).
 
-Note that this project should be considered a (working!) tech demo. Feature requests will likely not be implemented, and see [CONTRIBUTING.md](CONTRIBUTING.md) for details about which contributions are welcome.
+Note that this project should be considered a (working!) tech demo. Feature requests will likely not be implemented. See [CONTRIBUTING.md](CONTRIBUTING.md) for details about what kind of contributions are welcomed.
 
 ## Motivation
 
 Before starting router7, I was using the [Turris Omnia](https://omnia.turris.cz/en/) router running OpenWrt. That worked fine up until May 2018, when an automated update pulled in a new version of [odhcp6c](https://git.openwrt.org/?p=project/odhcp6c.git;a=shortlog), OpenWrt’s DHCPv6 client. That version is incompatible with fiber7’s DHCP server setup (I think there are shortcomings on both sides).
 
-It was not only quicker to develop my own router than to wait for either side to resolve the issue, but it was also a lot of fun and allowed me to really tailor my router to my needs, experimenting with a bunch of interesting ideas I had.
+Developing my own router is faster than waiting for either side to resolve the issue, and developing a router is also a lot of fun. It allowed me to tailor my router to my needs, experimenting with a bunch of interesting ideas I had.
 
 ## Project goals
 
-* Maximize internet connectivity: retain the most recent DHCP configuration across reboots and even after its expiration (chances are the DHCP server will be back before the configuration stops working).
+* Maximize internet connectivity: retain the most recent DHCP configuration across reboots and even after its expiration (sometimes the DHCP server will be back before the configuration stops working).
 * Unit/integration tests use fiber7 packet capture files to minimize the chance of software changes breaking my connectivity.
 * Safe and quick updates
   * Auto-rollback of updates which result in loss of connectivity: the diagnostics daemon assesses connectivity state, the update tool reads it and rolls back faulty updates.
@@ -32,19 +32,19 @@ The reference hardware platform is the [PC Engines™ apu2c4](https://pcengines.
 
 Other hardware might work, too, but is not tested.
 
-### Teensy rebootor
+### Teensy rebooter
 
-The cheap and widely-available [Teensy++ USB development board](https://www.pjrc.com/store/teensypp.html) comes with a firmware called rebootor, which is used by the [`teensy_loader_cli`](https://www.pjrc.com/teensy/loader_cli.html) program to perform hard resets.
+The cheap and widely-available [Teensy++ USB development board](https://www.pjrc.com/store/teensypp.html) comes with a firmware called rebooter, which is used by the [`teensy_loader_cli`](https://www.pjrc.com/teensy/loader_cli.html) program to perform hard resets.
 
 This setup can be used to programmatically reset the apu2c4 (from `rtr7-recover`) by connecting the Teensy++ to the [apu2c4’s reset pins](http://pcengines.ch/pdf/apu2.pdf):
 * connect the Teensy++’s `GND` pin to the apu2c4 J2’s pin 4 (`GND`)
 * connect the Teensy++’s `B7` pin to the apu2c4 J2’s pin 5 (`3.3V`, resets when pulled to `GND`)
 
-You can find a working rebootor firmware .hex file at https://github.com/PaulStoffregen/teensy_loader_cli/issues/38
+You can find a working rebooter firmware .hex file at https://github.com/PaulStoffregen/teensy_loader_cli/issues/38
 
 ## Architecture
 
-router7 is based on [gokrazy](https://gokrazy.org/): it is an appliance which gets packed into a hard disk image, containing a FAT partition with the kernel, a read-only SquashFS partition for the root file system and an ext4 partition for permanent data.
+router7 is based on [gokrazy](https://gokrazy.org/): gokrazy is an appliance which gets packed into a hard disk image, containing a FAT partition with the kernel, a read-only SquashFS partition for the root file system and an ext4 partition for permanent data.
 
 The individual services can be found in [github.com/rtr7/router7/cmd](https://godoc.org/github.com/rtr7/router7/cmd).
 
@@ -129,7 +129,7 @@ GOARCH=amd64 gokr-packer \
 
 Run `rtr7-recover -boot=/tmp/recovery/boot.img -mbr=/tmp/recovery/mbr.img -root=/tmp/recovery/root.img` to:
 
-* trigger a reset if a Teensy with the rebootor firmware is attached
+* trigger a reset if a Teensy with the rebooter firmware is attached
 * serve a DHCP lease to all clients which request PXE boot (i.e., your apu2c4)
 * serve via TFTP:
   * the PXELINUX bootloader
